@@ -1,10 +1,26 @@
 ---
-- name: Explore Ansible facts
+- name: Explore selected Ansible facts
   hosts: all
   gather_facts: true
 
   tasks:
 
-    - name: Show all facts
+    - name: Show architecture
       debug:
-        var: ansible_facts
+        var: ansible_architecture
+
+    - name: Show distribution
+      debug:
+        var: ansible_distribution
+
+    - name: Show distribution version
+      debug:
+        var: ansible_distribution_version
+
+    - name: Show mounts
+      debug:
+        var: ansible_mounts
+
+    - name: Show memory
+      debug:
+        var: ansible_memory_mb
