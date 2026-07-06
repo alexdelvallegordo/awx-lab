@@ -1,9 +1,41 @@
-- name: My first AWX playbook
+---
+- name: Check filesystem free space
   hosts: all
-  gather_facts: false
+  gather_facts: true
+
+  vars:
+    filesystem_to_check: "/opt"
+    minimum_free_mb: 1024
 
   tasks:
 
-    - name: Hello AWX
+    - name: Show filesystem being checked
       debug:
-        msg: "Hello from AWX!"
+        msg: "Checking free space on {{ filesystem_to_check }}"
+
+    - name: Get mount information for filesystem
+      set_fact:
+        target_mount: "{{ ansible_mounts | selectattr('mount', 'equalto', filesystem_to_check) | list | first | default({}) }}"
+
+    - name: Fail if filesystem does not exist
+      fail:
+        msg: "Filesystem {{ filesystem_to_check }} does not exist on this host."
+      when: target_mount == {}
+
+    - name: Calculate free space in MB
+      set_fact:
+        free_mb: "{{ (target_mount.size_available) / 1024 / 1024) | int }}"
+
+    - name: Show free space
+      debug:
+        msg: "Filesystem {{ filesystem_to_check }} has {{ free_mb }} MB free."
+
+    - name: Fail if free space is below threshold
+      fail:
+        msg: "Not enough free space on {{ filesystem_to_check }}. Required: {{ minimum_free_mb }} MB. Available: {{ free_mb }} MB."
+      when: free_mb | int < minimum_free_mb | int
+
+    - name: Success message
+      debug:
+        msg: "OK: {{ filesystem_to_check }} has enough free space."
+      
