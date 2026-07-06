@@ -1,0 +1,9 @@
+- name: My first AWX playbook
+  hosts: all
+  gather_facts: false
+
+  tasks:
+
+    - name: Hello AWX
+      debug:
+        msg: "Hello from AWX!"
